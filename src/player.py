@@ -1,20 +1,39 @@
+import pygame
 
 
 class Player:
-    def __init__(self, name: str, skills: dict[str, int], position: tuple[float, float]) -> None:
-        self.name: str = name
-        self.skills: dict[str, int] = skills
-        self.health: int = 100
-        self.level: int = 1
-        self.experience: int = 0
-        self.money: int = 100
-        self.position: tuple[float, float] = position
+    def __init__(self, name, position, width=64, height=64, sight_size=8, speed=2, image='player.png'):
+        self.name = name
+        self.position = position
+        self.image = pygame.image.load(image)
+        self.image = pygame.transform.scale(self.image, (32, 32))
+        self.rect = self.image.get_rect(center=self.position)
+        self.direction = pygame.math.Vector2()
+        # width, height necessary or get from self.rect (same situation with top_left)?
+        self.player_width, self.player_height = width, height
+        self.top_left = position[0] - self.player_width / 2, position[1] - self.player_height / 2
+        self.sight_size = sight_size
+        self.sight_offset = 4
+        self.total_sight_load = self.sight_size + self.sight_offset
+        self.speed = speed
 
-    def show_skills(self):
-        for key in self.skills.keys():
-            print(f"{key} : {self.skills[key]}")
+    def input(self):
+        keys = pygame.key.get_pressed()
 
+        if keys[pygame.K_UP]:
+            self.direction.y = -1
+        elif keys[pygame.K_DOWN]:
+            self.direction.y = 1
+        else:
+            self.direction.y = 0
 
-if __name__ == "__main__":
-    p = Player('Olav', {'Strength': 8, 'Stamina': 7, 'Agility': 9, 'Wisdom': 6}, (128, 128))
-    p.show_skills()
+        if keys[pygame.K_RIGHT]:
+            self.direction.x = 1
+        elif keys[pygame.K_LEFT]:
+            self.direction.x = -1
+        else:
+            self.direction.x = 0
+
+    def update(self):
+        self.input()
+        self.rect.center += self.direction * self.speed
